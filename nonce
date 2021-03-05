@@ -1,0 +1,33 @@
+import requests
+import lxml
+import bs4
+from openpyxl import Workbook
+
+
+b =1 
+n = 2
+workbook = Workbook()
+sheet = workbook.active
+    
+for i in range(0,100):
+
+    url_blocks = f'https://blockchair.com/bitcoin/block/{b}'
+    page = requests.get(url_blocks)
+    soup = bs4.BeautifulSoup(page.text, "lxml")
+    bitcoin_hash = soup.find('span', class_="word--break mobile--short").get_text()
+    
+    b = b + 1
+
+    page = requests.get(f"https://btc.com/{bitcoin_hash}")
+    soup = bs4.BeautifulSoup(page.text,"lxml")
+    nonce = soup.find_all("dd", class_="text-monospace")
+    x = str(nonce[1])
+    x = x.split(" ")
+    x = str(x[2])
+    x = int(x, 16)
+
+
+    sheet[f"B{n}"] = x
+    n = n + 1
+        
+workbook.save(filename="nonce_scarping.xlsx")
